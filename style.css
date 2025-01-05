@@ -1,0 +1,33 @@
+@media (max-width: 768px) {
+    /* Estilos para telas com largura máxima de 768 pixels */
+    body {
+      font-size: 16px;
+    }
+    .container {
+      width: 100%;
+    }
+  }
+
+  body {
+    font-family: 'Press Start 2P', cursive;
+  }
+
+
+  header{
+    display: flex;
+    background-color: rgb(13, 13, 133);
+    padding: 5px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  header img{
+    width: 25%;
+    align-items: center;
+  }
+  
+header ul a{
+    padding: 10px;
+    align-items: center;
+}
