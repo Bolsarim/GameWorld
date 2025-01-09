@@ -14,21 +14,21 @@
 
 
   header{
-    display: flex;
+   
+    
     background-color: rgb(230, 230, 240);
-    padding: 5px;
     align-items: center;
     flex-wrap: wrap;
     justify-content: space-between;
   }
 
   header img{
-    padding:1px;
-    width: 25%;
+    margin: 0 auto;
+    display: flex;
     align-items: center;
   }
   
-header ul a{
+header a{
     padding: 10px;
     align-items: center;
 }
