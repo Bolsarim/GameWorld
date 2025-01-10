@@ -143,7 +143,7 @@ header a{
  }
  
  /*
-  * Mas vamos esconder o do meio.
+  * But let's hide the middle one.
   */
  .menu #menuToggle input:checked ~ span:nth-last-child(3)
  {
@@ -153,7 +153,7 @@ header a{
  }
  
  /*
-  * o último deve ir na outra direção
+  * Ohyeah and the last one should go the other direction
   */
  .menu #menuToggle input:checked ~ span:nth-last-child(2)
  {
@@ -162,8 +162,8 @@ header a{
  }
  
  /*
-  * Faça este absoluto posicionado
-  *no canto superior esquerdo da tela
+  * Make this absolute positioned
+  * at the top left of the screen
   */
   
  .menu #menu
@@ -202,7 +202,7 @@ header a{
  }
  
  /*
-  * E vamos deslizar da esquerda
+  * And let's slide it in from the left
   */
  .menu #menuToggle input:checked ~ ul
  {

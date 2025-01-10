@@ -208,3 +208,5 @@ initSmoothScrolling();
 
 // Chama a função de inicialização
 init();
+
+
