@@ -65,6 +65,9 @@ header a{
 
 body {
   margin: 0;
+  padding: 0;
+  overflow-y: auto; /* Permite rolagem vertical */
+  margin: 0;
   color: var(--color-text);
   background-color: var(--color-bg);
   font-family: "Poppins", sans-serif;
@@ -73,13 +76,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.noscroll {
-  height: 100dvh;
-  width: 100%;
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-}
+
 
 a {
   text-decoration: none;
@@ -142,6 +139,7 @@ a:focus-visible {
 }
 
 .grid {
+
   gap: 1rem;
   flex: none;
   position: relative;
@@ -256,7 +254,7 @@ a:focus-visible {
   z-index: 0;
   background: url(https://github.com/misalagp/imgs/blob/main/noise.png?raw=true),
     radial-gradient(at top, #688d68 0%, #ddd 100%);
-  background-size: 250px, 100%;
+  background-size: 250px, 0%;
 }
 
 .content > * {
@@ -320,3 +318,7 @@ a:focus-visible {
     font-size: clamp(2rem, 7vh, 4rem);
   }
 }
+
+
+
+

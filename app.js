@@ -1,21 +1,22 @@
+// Importa o plugin Flip da GSAP
 gsap.registerPlugin(Flip);
 
+// Seletores dos elementos principais
 const body = document.body;
 const content = document.querySelector(".content");
-const enterButton = document.querySelector(".enter");
-const fullview = document.querySelector(".fullview");
 const grid = document.querySelector(".grid");
 const gridRows = grid.querySelectorAll(".row");
 
-// Cache window size and update on resize
+// Cache do tamanho da janela e atualização no redimensionamento
 let winsize = { width: window.innerWidth, height: window.innerHeight };
 window.addEventListener("resize", () => {
   winsize = { width: window.innerWidth, height: window.innerHeight };
 });
 
+// Posição do mouse inicializada no centro da janela
 let mousepos = { x: winsize.width / 2, y: winsize.height / 2 };
 
-// Configuration for enabling/disabling animations
+// Configuração para habilitar/desabilitar animações
 const config = {
   translateX: true,
   skewX: false,
@@ -24,39 +25,32 @@ const config = {
   brightness: true
 };
 
-// Total number of rows
+// Número total de linhas
 const numRows = gridRows.length;
-// Calculate the middle row assuming an odd number of rows
+// Calcula a linha do meio assumindo um número ímpar de linhas
 const middleRowIndex = Math.floor(numRows / 2);
 
 const middleRow = gridRows[middleRowIndex];
 const middleRowItems = middleRow.querySelectorAll(".row__item");
 const numRowItems = middleRowItems.length;
-const middleRowItemIndex = Math.floor(numRowItems / 2); // Index of the middle item in the middle row
-// Select the .row__item-inner element inside the middle .row__item element of the middle row
-// This element will be used for the animation that transitions the image to fullscreen when the button is clicked
+const middleRowItemIndex = Math.floor(numRowItems / 2); // Índice do item do meio na linha do meio
 const middleRowItemInner = middleRowItems[middleRowItemIndex].querySelector(
   ".row__item-inner"
 );
-// And the inner image
 const middleRowItemInnerImage = middleRowItemInner.querySelector(
   ".row__item-img"
 );
-// Setting the final size of the middle image for the reveal effect
 middleRowItemInnerImage.classList.add("row__item-img--large");
 
-// amt represents the interpolation amount for each row's movement.
-// A higher amt value means faster interpolation and less lag behind the mouse movement.
-const baseAmt = 0.1; // The amt for the middle row, which will have the fastest response.
-const minAmt = 0.05; // Minimum amt value to ensure rows have a noticeable movement lag.
-const maxAmt = 0.1; // Maximum amt value to ensure rows have a noticeable movement lag.
+// Configuração de interpolação para movimento de cada linha
+const baseAmt = 0.1; // Interpolação mais rápida para a linha do meio
+const minAmt = 0.05; // Valor mínimo para garantir movimento perceptível
+const maxAmt = 0.1; // Valor máximo para garantir movimento perceptível
 
-// Initialize rendered styles for each row with dynamically calculated amt values
+// Inicializa estilos renderizados para cada linha
 let renderedStyles = Array.from({ length: numRows }, (v, index) => {
   const distanceFromMiddle = Math.abs(index - middleRowIndex);
-  // Calculate amt dynamically based on the distance from the middle row
   const amt = Math.max(baseAmt - distanceFromMiddle * 0.03, minAmt);
-  // Inverted amt for scale: outermost rows are faster
   const scaleAmt = Math.min(baseAmt + distanceFromMiddle * 0.03, maxAmt);
   let style = { amt, scaleAmt };
 
@@ -82,7 +76,7 @@ let renderedStyles = Array.from({ length: numRows }, (v, index) => {
 // Tracks if the render loop is running
 let requestId;
 
-// Function to get the mouse position
+// Função para obter a posição do mouse
 const getMousePos = (ev) => {
   let posx = 0;
   let posy = 0;
@@ -101,74 +95,52 @@ const getMousePos = (ev) => {
   return { x: posx, y: posy };
 };
 
-// Update mouse position
+// Atualiza a posição do mouse
 const updateMousePosition = (ev) => {
   const pos = getMousePos(ev);
   mousepos.x = pos.x;
   mousepos.y = pos.y;
 };
 
-// Linear interpolation function
+// Função de interpolação linear
 const lerp = (a, b, n) => (1 - n) * a + n * b;
 
-// Map mouse position to translation range
+// Mapeia a posição do mouse para a faixa de translação
 const calculateMappedX = () => {
   return (((mousepos.x / winsize.width) * 2 - 1) * 40 * winsize.width) / 100;
 };
 
-// Map mouse position to skew range (-3 to 3)
-const calculateMappedSkew = () => {
-  return ((mousepos.x / winsize.width) * 2 - 1) * 3;
-};
-
-// Map mouse position to contrast range (100 at center to 125 at edges)
+// Mapeia a posição do mouse para a faixa de contraste
 const calculateMappedContrast = () => {
   const centerContrast = 100;
   const edgeContrast = 330;
   const t = Math.abs((mousepos.x / winsize.width) * 2 - 1);
-  const factor = Math.pow(t, 2); // Quadratic factor for non-linear mapping
+  const factor = Math.pow(t, 2);
   return centerContrast - factor * (centerContrast - edgeContrast);
 };
 
-// Map mouse position to scale range (1 at center to 0.95 at edges)
-const calculateMappedScale = () => {
-  const centerScale = 1;
-  const edgeScale = 0.95;
-  return (
-    centerScale -
-    Math.abs((mousepos.x / winsize.width) * 2 - 1) * (centerScale - edgeScale)
-  );
-};
-
-// Map mouse position to brightness range (100 at center to 15 at edges)
+// Mapeia a posição do mouse para a faixa de brilho
 const calculateMappedBrightness = () => {
   const centerBrightness = 100;
   const edgeBrightness = 15;
   const t = Math.abs((mousepos.x / winsize.width) * 2 - 1);
-  const factor = Math.pow(t, 2); // Quadratic factor for non-linear mapping
+  const factor = Math.pow(t, 2);
   return centerBrightness - factor * (centerBrightness - edgeBrightness);
 };
 
-// Function to get the value of a CSS variable
-const getCSSVariableValue = (element, variableName) => {
-  return getComputedStyle(element).getPropertyValue(variableName).trim();
-};
-
-// Render the current frame
+// Renderiza o quadro atual
 const render = () => {
   const mappedValues = {
     translateX: calculateMappedX(),
-    skewX: calculateMappedSkew(),
     contrast: calculateMappedContrast(),
-    scale: calculateMappedScale(),
     brightness: calculateMappedBrightness()
   };
 
-  // Calculate and set the translation for each row
+  // Calcula e define a translação para cada linha
   gridRows.forEach((row, index) => {
     const style = renderedStyles[index];
 
-    // Update current positions and interpolate values
+    // Atualiza posições atuais e interpola valores
     for (let prop in config) {
       if (config[prop]) {
         style[prop].current = mappedValues[prop];
@@ -181,11 +153,9 @@ const render = () => {
       }
     }
 
-    // Apply the interpolated values
+    // Aplica os valores interpolados
     let gsapSettings = {};
     if (config.translateX) gsapSettings.x = style.translateX.previous;
-    if (config.skewX) gsapSettings.skewX = style.skewX.previous;
-    if (config.scale) gsapSettings.scale = style.scale.previous;
     if (config.contrast)
       gsapSettings.filter = `contrast(${style.contrast.previous}%)`;
     if (config.brightness)
@@ -196,111 +166,45 @@ const render = () => {
     gsap.set(row, gsapSettings);
   });
 
-  // Continue the render loop
+  // Continua o loop de renderização
   requestId = requestAnimationFrame(render);
 };
 
-// Start the render loop
+// Inicia o loop de renderização
 const startRendering = () => {
   if (!requestId) {
     render();
   }
 };
 
-// Stop the render loop
-const stopRendering = () => {
-  if (requestId) {
-    cancelAnimationFrame(requestId);
-    requestId = undefined;
-  }
-};
-
-const enterFullview = () => {
-  // Logic to animate the middle image to full view using gsap Flip
-  const flipstate = Flip.getState(middleRowItemInner);
-  fullview.appendChild(middleRowItemInner);
-
-  // Get the CSS variable value for the translation
-  const transContent = getCSSVariableValue(content, "--trans-content");
-
-  // Create a GSAP timeline for the Flip animation
-  const tl = gsap.timeline();
-
-  // Add the Flip animation to the timeline
-  tl.add(
-    Flip.from(flipstate, {
-      duration: 0.9,
-      ease: "power4",
-      absolute: true,
-      onComplete: stopRendering
-    })
-  )
-    // Fade out grid
-    .to(
-      grid,
-      {
-        duration: 0.9,
-        ease: "power4",
-        opacity: 0.01
-      },
-      0
-    )
-    // Scale up the inner image
-    .to(
-      middleRowItemInnerImage,
-      {
-        scale: 1.2,
-        duration: 3,
-        ease: "sine"
-      },
-      "<-=0.45"
-    )
-    // Move the content up
-    .to(content, {
-      y: transContent, // Use the CSS variable value
-      duration: 0.9,
-      ease: "power4"
-    });
-
-  // Hide the button
-  enterButton.classList.add("hidden");
-  // Scrolling allowed
-  body.classList.remove("noscroll");
-};
-
-// Initialization function
+// Inicialização
 const init = () => {
   startRendering();
-
-  // Initialize click event for the "Explore" button
-  enterButton.addEventListener("click", enterFullview);
-  // Add touchstart event for mobile devices
-  enterButton.addEventListener("touchstart", enterFullview);
 };
 
-// Mouse movement event listener to update mouse position
+// Listener de movimento do mouse
 window.addEventListener("mousemove", updateMousePosition);
-// Touch move event listener for touch devices
+// Listener de movimento em dispositivos touch
 window.addEventListener("touchmove", (ev) => {
   const touch = ev.touches[0];
   updateMousePosition(touch);
 });
 
 const initSmoothScrolling = () => {
-  // Initialize Lenis for smooth scroll effects. Lerp value controls the smoothness.
+  // Inicializa Lenis para efeitos de rolagem suave
   const lenis = new Lenis({ lerp: 0.15 });
 
-  // Ensure GSAP animations are in sync with Lenis' scroll frame updates.
+  // Sincroniza animações GSAP com os quadros de rolagem do Lenis
   gsap.ticker.add((time) => {
-    lenis.raf(time * 1000); // Convert GSAP's time to milliseconds for Lenis.
+    lenis.raf(time * 1000);
   });
 
-  // Turn off GSAP's default lag smoothing to avoid conflicts with Lenis.
+  // Desativa o ajuste de lag padrão do GSAP para evitar conflitos
   gsap.ticker.lagSmoothing(0);
 };
 
-// Activate the smooth scrolling feature.
+// Ativa o recurso de rolagem suave
 initSmoothScrolling();
 
-// Call the initialization function
+// Chama a função de inicialização
 init();
